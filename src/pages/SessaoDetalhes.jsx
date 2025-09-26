@@ -7,6 +7,10 @@ import { Button } from '../components/Button';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ArrowLeft, Clock, Calendar, User, FileText, Edit3, Save, X } from 'lucide-react';
 
+
+
+
+
 export const SessaoDetalhes = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
