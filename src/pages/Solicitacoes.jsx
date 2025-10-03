@@ -4,7 +4,7 @@ import { mockApi } from '../services/mockApi';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { Bell, User, Clock, AlertCircle, CheckCircle, X } from 'lucide-react';
+import { Bell, User, Clock, CheckCircle, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Solicitacoes = () => {
@@ -21,7 +21,6 @@ export const Solicitacoes = () => {
     setLoading(true);
     try {
       const data = await mockApi.getRequests(user.id);
-      // Filtrar apenas solicitações pendentes
       const pendingRequests = data.filter(req => req.status === 'pendente');
       setRequests(pendingRequests);
     } catch (error) {
@@ -33,34 +32,30 @@ export const Solicitacoes = () => {
 
   const handleAcceptRequest = async (requestId, requestData) => {
     setProcessingRequests(prev => new Set([...prev, requestId]));
-    
+
     try {
-      // Verificar se já existe paciente com mesmo email
       const existingPatients = await mockApi.getPatients(user.id);
       const duplicatePatient = existingPatients.find(p => p.email === requestData.patientEmail);
-      
+
       if (duplicatePatient) {
         toast.error('Este paciente já está cadastrado em sua lista!');
         return;
       }
 
-      // Criar novo paciente
       await mockApi.createPatient({
         name: requestData.patientName,
         email: requestData.patientEmail,
         phone: requestData.patientPhone,
-        birthDate: '1990-01-01', // Valor padrão - pode ser atualizado depois
-        age: 30, // Valor padrão - pode ser atualizado depois
+        birthDate: '1990-01-01',
+        age: 30,
         status: 'Ativo',
         psychologistId: user.id
       });
 
-      // Atualizar status da solicitação
       await mockApi.updateRequestStatus(requestId, 'aceito', 'Paciente aceito e cadastrado no sistema');
-      
-      // Remover solicitação da lista
+
       setRequests(prev => prev.filter(req => req.id !== requestId));
-      
+
       toast.success('Solicitação aceita! Paciente adicionado à sua lista.');
     } catch (error) {
       console.error('Erro ao aceitar solicitação:', error);
@@ -76,13 +71,12 @@ export const Solicitacoes = () => {
 
   const handleRejectRequest = async (requestId) => {
     setProcessingRequests(prev => new Set([...prev, requestId]));
-    
+
     try {
       await mockApi.updateRequestStatus(requestId, 'rejeitado', 'Solicitação rejeitada pelo psicólogo');
-      
-      // Remover solicitação da lista
+
       setRequests(prev => prev.filter(req => req.id !== requestId));
-      
+
       toast.success('Solicitação rejeitada.');
     } catch (error) {
       console.error('Erro ao rejeitar solicitação:', error);
@@ -125,65 +119,9 @@ export const Solicitacoes = () => {
 
       <div className="grid gap-6">
         {requests.length === 0 ? (
-         <Card className="space-y-4 p-6 shadow-lg rounded-2xl bg-white border border-gray-100 hover:shadow-xl transition">
-         <div className="flex justify-between items-start">
-           {/* Infos Paciente */}
-           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
-               {request.patientName.charAt(0)}
-             </div>
-             <div>
-               <h3 className="text-lg font-semibold text-gray-900">{request.patientName}</h3>
-               <p className="text-sm text-gray-600 flex items-center gap-1">📧 {request.patientEmail}</p>
-               <p className="text-sm text-gray-600 flex items-center gap-1">📞 {request.patientPhone}</p>
-             </div>
-           </div>
-       
-           {/* Badges */}
-           <div className="flex gap-2">
-             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getUrgencyColor(request.urgency)}`}>
-               {request.urgency === 'alta' ? 'Alta' : request.urgency === 'media' ? 'Média' : 'Baixa'} urgência
-             </span>
-             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(request.status)}`}>
-               {request.status === 'aceito' ? 'Aceito' : request.status === 'rejeitado' ? 'Rejeitado' : 'Pendente'}
-             </span>
-           </div>
-         </div>
-       
-         {/* Descrição */}
-         <div className="bg-gray-50 rounded-lg p-4 border">
-           <h4 className="font-medium text-gray-800 mb-1">📝 Descrição da necessidade:</h4>
-           <p className="text-gray-600">{request.description}</p>
-         </div>
-       
-         {/* Data */}
-         <div className="flex items-center gap-2 text-sm text-gray-500">
-           <Clock className="w-4 h-4" />
-           Enviado em {new Date(request.createdAt).toLocaleDateString('pt-BR')}
-         </div>
-       
-         {/* Ações */}
-         <div className="flex gap-3">
-           <Button
-             variant="secondary"
-             onClick={() => handleRejectRequest(request.id)}
-             loading={processingRequests.has(request.id)}
-             className="flex-1 flex items-center justify-center gap-2 bg-red-100 text-red-700 hover:bg-red-200"
-           >
-             <X className="w-4 h-4" />
-             Rejeitar
-           </Button>
-           <Button
-             onClick={() => handleAcceptRequest(request.id, request)}
-             loading={processingRequests.has(request.id)}
-             className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white hover:bg-green-700"
-           >
-             <CheckCircle className="w-4 h-4" />
-             Aceitar
-           </Button>
-         </div>
-       </Card>
-       
+          <Card className="p-6 text-center text-gray-600 bg-white border border-gray-100 rounded-xl shadow">
+            <p>Você não possui solicitações pendentes no momento.</p>
+          </Card>
         ) : (
           requests.map(request => (
             <Card key={request.id} className="space-y-4">
@@ -198,7 +136,7 @@ export const Solicitacoes = () => {
                     <p className="text-sm text-dark/60">{request.patientPhone}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUrgencyColor(request.urgency)}`}>
                     {request.urgency === 'alta' ? 'Alta' : request.urgency === 'media' ? 'Média' : 'Baixa'} urgência
