@@ -20,24 +20,7 @@ const locaisApoio = [
     endereco: "Av. Vicente Simões, 370 – Centro, Pouso Alegre",
     telefone: "(35) 2103-2450",
   },
-  {
-    id: 2,
-    nome: "Abrigo Seguro - Pouso Alegre",
-    tipo: "abrigo",
-    lat: -22.2345,
-    lng: -45.935,
-    endereco: "Rua das Flores, 50 - Pouso Alegre",
-    telefone: "(35) 98888-1111",
-  },
-  {
-    id: 3,
-    nome: "ONG TamoJuntas - Pouso Alegre",
-    tipo: "ong",
-    lat: -22.231,
-    lng: -45.931,
-    endereco: "Rua Esperança, 75 - Pouso Alegre",
-    telefone: "(35) 97777-2222",
-  },
+
 ];
 
 export default function MapaDeApoio({ filtros }) {
